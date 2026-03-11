@@ -64,7 +64,7 @@ export default function Dashboard() {
           return;
         }
 
-        const res = await axios.get('http://localhost:5000/api/analytics', {
+        const res = await axios.get('https://bigbites-backend.onrender.com/api/analytics', {
           headers: { Authorization: `Bearer ${token}` }
         });
 

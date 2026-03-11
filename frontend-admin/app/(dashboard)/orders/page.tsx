@@ -37,7 +37,7 @@ export default function OrdersPage() {
       }
 
       // Fetch all orders - assuming we have GET /api/orders
-      const res = await axios.get('http://localhost:5000/api/orders', {
+      const res = await axios.get('https://bigbites-backend.onrender.com/api/orders', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -54,7 +54,7 @@ export default function OrdersPage() {
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
       const token = Cookies.get('token') || localStorage.getItem('adminToken');
-      const res = await axios.put(`http://localhost:5000/api/orders/${orderId}/status`, { status }, {
+      const res = await axios.put(`https://bigbites-backend.onrender.com/api/orders/${orderId}/status`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

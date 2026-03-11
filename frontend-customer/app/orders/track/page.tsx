@@ -14,7 +14,7 @@ export default function OrderTrackingPage() {
 
   useEffect(() => {
     // In a real app, URL config from environment
-    const newSocket = io('http://localhost:5000', {
+    const newSocket = io('https://bigbites-backend.onrender.com', {
       withCredentials: true,
     });
 
