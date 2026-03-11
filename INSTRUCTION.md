@@ -1547,7 +1547,7 @@ NODE_ENV=production
 PORT=5000
 
 # Database
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/bigbites
+MONGODB_URI=mongodb://localhost:27017/bigbites
 
 # JWT
 JWT_SECRET=your-super-secret-key-change-this-in-production
