@@ -1,0 +1,12 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shadow (matching background context) -->
+  <ellipse cx="256" cy="440" rx="180" ry="20" fill="#E6DFD3"/>
+  <!-- Top Bun -->
+  <path d="M 116 260 C 116 100, 396 100, 396 260 Z" fill="#F8C060" stroke="#372013" stroke-width="24" stroke-linejoin="round"/>
+  <!-- Cheese Layer -->
+  <path d="M 80 260 C 130 300, 200 240, 256 260 C 312 280, 380 240, 432 260 L 440 280 C 380 320, 312 280, 256 300 C 200 320, 130 280, 72 280 Z" fill="#FCD300" stroke="#372013" stroke-width="24" stroke-linejoin="round"/>
+  <!-- Bottom Bun -->
+  <path d="M 126 310 C 126 420, 386 420, 386 310 Z" fill="#F8C060" stroke="#372013" stroke-width="24" stroke-linejoin="round"/>
+  <!-- Detail highlight on top bun -->
+  <path d="M 160 170 C 180 140, 230 140, 250 160" fill="none" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="12" stroke-linecap="round"/>
+</svg>

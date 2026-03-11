@@ -1,0 +1,94 @@
+require('dotenv').config();
+const express = require('express');
+const http = require('http');
+const cors = require('cors');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const rateLimit = require('express-rate-limit');
+const connectDB = require('./config/db');
+
+// Connect to database
+// Connect to database
+connectDB().then(async () => {
+  const User = require('./models/User');
+  try {
+    const adminExists = await User.findOne({ email: process.env.ADMIN_EMAIL });
+    if (!adminExists) {
+      await User.create({
+        name: 'Admin User',
+        email: process.env.ADMIN_EMAIL,
+        password: process.env.ADMIN_PASSWORD,
+        phone: '+919876543210',
+        role: 'admin'
+      });
+      console.log('Admin user seeded');
+    }
+  } catch (err) {
+    console.error('Failed to seed admin user:', err);
+  }
+});
+
+const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.io
+const socket = require('./utils/socket');
+socket.init(server);
+
+// Security Middlewares
+app.use(helmet());
+app.use(mongoSanitize());
+app.use(xss());
+
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://bigbites.com', 'https://admin.bigbites.com']
+    : ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
+// Rate Limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100, // 100 requests per 15 mins
+  message: 'Too many requests. Please try again later.'
+});
+app.use('/api/', apiLimiter);
+
+// Body parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
+const authRoutes = require('./routes/authRoutes');
+const restaurantRoutes = require('./routes/restaurantRoutes');
+const menuRoutes = require('./routes/menuRoutes');
+const foodItemRoutes = require('./routes/foodItemRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/restaurants', restaurantRoutes);
+app.use('/api/menus', menuRoutes);
+app.use('/api/food-items', foodItemRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/analytics', analyticsRoutes);
+
+// Basic route for testing
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ success: true, message: 'Big Bites API is running!' });
+});
+
+// Port configuration
+const PORT = process.env.PORT || 5000;
+
+server.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+});
