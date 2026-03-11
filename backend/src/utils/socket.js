@@ -6,10 +6,20 @@ module.exports = {
   init: (httpServer) => {
     io = socketIo(httpServer, {
       cors: {
-        origin: process.env.NODE_ENV === 'production' 
-          ? ['https://bigbites.com', 'https://admin.bigbites.com']
-          : ['http://localhost:3000', 'http://localhost:3001'],
-        methods: ["GET", "POST"],
+        origin: function (origin, callback) {
+          const allowedOrigins = [
+            'http://localhost:3000', 
+            'http://localhost:3001',
+            'https://frontend-admin-gkebr1759-ritesh-bhardwajs-projects.vercel.app',
+            'https://frontend-customer-m1ctotr77-ritesh-bhardwajs-projects.vercel.app'
+          ];
+          if (!origin || allowedOrigins.includes(origin) || (origin && origin.endsWith('.vercel.app'))) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        },
+        methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true
       }
     });

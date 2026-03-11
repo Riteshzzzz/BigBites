@@ -41,10 +41,21 @@ app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
 
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'http://localhost:3001',
+  'https://frontend-admin-gkebr1759-ritesh-bhardwajs-projects.vercel.app',
+  'https://frontend-customer-m1ctotr77-ritesh-bhardwajs-projects.vercel.app'
+];
+
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://bigbites.com', 'https://admin.bigbites.com']
-    : ['http://localhost:3000', 'http://localhost:3001'],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || (origin && origin.endsWith('.vercel.app'))) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };
