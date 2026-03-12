@@ -59,17 +59,7 @@ const allowedOrigins = [
 ];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Log origin for debugging CORS issues in production
-    if (origin) console.log(`Incoming request from origin: ${origin}`);
-    
-    if (!origin || allowedOrigins.includes(origin) || (origin && origin.endsWith('.vercel.app'))) {
-      callback(null, true);
-    } else {
-      console.warn(`Origin ${origin} blocked by CORS`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true, // Allow all origins temporarily to rule out CORS as the cause of login failure
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -109,6 +99,23 @@ app.use('/api/analytics', analyticsRoutes);
 // Basic route for testing
 app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'Big Bites API is running!' });
+});
+
+// Debug route to verify admin user (Remove in production)
+app.get('/api/debug/admin-check', async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@bigbites.com';
+    const admin = await User.findOne({ email: adminEmail });
+    res.json({ 
+      exists: !!admin, 
+      email: adminEmail,
+      role: admin ? admin.role : null,
+      isActive: admin ? admin.isActive : null
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Port configuration
