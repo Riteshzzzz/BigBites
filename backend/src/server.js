@@ -13,19 +13,26 @@ const connectDB = require('./config/db');
 connectDB().then(async () => {
   const User = require('./models/User');
   try {
-    const adminExists = await User.findOne({ email: process.env.ADMIN_EMAIL });
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@bigbites.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'BigBites@Admin2024!';
+    
+    console.log(`Checking for admin user: ${adminEmail}`);
+    const adminExists = await User.findOne({ email: adminEmail });
+    
     if (!adminExists) {
       await User.create({
         name: 'Admin User',
-        email: process.env.ADMIN_EMAIL,
-        password: process.env.ADMIN_PASSWORD,
+        email: adminEmail,
+        password: adminPassword,
         phone: '+919876543210',
         role: 'admin'
       });
-      console.log('Admin user seeded');
+      console.log('Successfully seeded default admin user');
+    } else {
+      console.log('Admin user already exists');
     }
   } catch (err) {
-    console.error('Failed to seed admin user:', err);
+    console.error('Failed to seed admin user:', err.message);
   }
 });
 
@@ -50,9 +57,13 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
+    // Log origin for debugging CORS issues in production
+    if (origin) console.log(`Incoming request from origin: ${origin}`);
+    
     if (!origin || allowedOrigins.includes(origin) || (origin && origin.endsWith('.vercel.app'))) {
       callback(null, true);
     } else {
+      console.warn(`Origin ${origin} blocked by CORS`);
       callback(new Error('Not allowed by CORS'));
     }
   },
