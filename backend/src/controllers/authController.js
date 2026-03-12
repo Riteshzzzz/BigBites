@@ -51,9 +51,19 @@ exports.login = async (req, res) => {
   try {
     const validatedData = loginSchema.parse(req.body);
 
+    console.log(`Login attempt for: ${validatedData.email}`);
     const user = await User.findOne({ email: validatedData.email });
 
-    if (!user || !(await user.comparePassword(validatedData.password))) {
+    if (!user) {
+      console.warn(`Login failed: User not found for ${validatedData.email}`);
+      return res.status(401).json({ success: false, error: 'Invalid email or password' });
+    }
+
+    const isMatch = await user.comparePassword(validatedData.password);
+    console.log(`Password match for ${validatedData.email}: ${isMatch}`);
+
+    if (!isMatch) {
+      console.warn(`Login failed: Invalid password for ${validatedData.email}`);
       return res.status(401).json({ success: false, error: 'Invalid email or password' });
     }
 

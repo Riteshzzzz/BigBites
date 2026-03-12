@@ -29,7 +29,10 @@ connectDB().then(async () => {
       });
       console.log('Successfully seeded default admin user');
     } else {
-      console.log('Admin user already exists');
+      // Force update password in case it was seeded incorrectly before
+      adminExists.password = adminPassword;
+      await adminExists.save();
+      console.log('Admin user verified and password synchronized');
     }
   } catch (err) {
     console.error('Failed to seed admin user:', err.message);
