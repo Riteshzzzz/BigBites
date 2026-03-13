@@ -33,7 +33,10 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const baseUrl = rawApiUrl.replace(/\/$/, '');
+      const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+      
       const res = await axios.post(`${apiUrl}/auth/login`, {
         email: data.email,
         password: data.password
