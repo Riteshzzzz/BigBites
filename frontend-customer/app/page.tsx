@@ -54,7 +54,8 @@ export default function Home() {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const res = await axios.get('https://bigbites-backend.onrender.com/api/restaurants?limit=3');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${apiUrl}/restaurants?limit=3`);
         if (res.data.success) {
           setTopRestaurants(res.data.data);
         }

@@ -1,3 +1,8 @@
+// Only load .env in development
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
@@ -6,13 +11,21 @@ const connectDB = async () => {
       console.error("FATAL ERROR: MONGODB_URI environment variable is not defined!");
       process.exit(1);
     }
-    const maskedURI = process.env.MONGODB_URI.replace(/\/\/.*@/, "//****:****@");
+    const dbURI = process.env.MONGODB_URI;
+    const maskedURI = dbURI.replace(/\/\/.*@/, "//****:****@");
+    
+    if (dbURI.includes('localhost') || dbURI.includes('127.0.0.1')) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error("Illegal attempt to connect to localhost in PRODUCTION mode. Please check MONGODB_URI in Render.");
+      }
+      console.warn("Connecting to local MongoDB instance (Development Mode)");
+    }
+
     console.log(`Attempting to connect to MongoDB: ${maskedURI}`);
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    const conn = await mongoose.connect(dbURI);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    const maskedError = error.message.replace(/\/\/.*@/, "//****:****@");
-    console.error(`Error connecting to MongoDB: ${maskedError}`);
+    console.error(`Error connecting to MongoDB: ${error.message}`);
     process.exit(1);
   }
 };

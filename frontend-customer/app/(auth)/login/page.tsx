@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Loader2 } from 'lucide-react';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Valid email is required' }),
@@ -13,6 +15,7 @@ const loginSchema = z.object({
 });
 
 export default function LoginPage() {
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm({
@@ -21,11 +24,25 @@ export default function LoginPage() {
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
-    // TODO: Connect to actual backend API
-    setTimeout(() => {
+    setError('');
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const res = await axios.post(`${apiUrl}/auth/login`, {
+        email: data.email,
+        password: data.password
+      });
+
+      if (res.data.success) {
+        localStorage.setItem('userToken', res.data.data.token);
+        Cookies.set('token', res.data.data.token, { expires: 1 });
+        window.location.href = '/';
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Invalid credentials or error occurred');
+    } finally {
       setIsLoading(false);
-      window.location.href = '/';
-    }, 1500);
+    }
   };
 
   return (
@@ -34,6 +51,12 @@ export default function LoginPage() {
         <h2 className="text-3xl font-extrabold text-gray-900 font-outfit">Welcome Back</h2>
         <p className="mt-2 text-sm text-gray-500">Sign in to your Big Bites account</p>
       </div>
+
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl relative text-sm font-medium">
+          {error}
+        </div>
+      )}
 
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <div>

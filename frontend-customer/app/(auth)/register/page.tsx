@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Loader2 } from 'lucide-react';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: 'Name is required' }),
@@ -15,6 +17,7 @@ const registerSchema = z.object({
 });
 
 export default function RegisterPage() {
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm({
@@ -23,11 +26,20 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
     setIsLoading(true);
-    // TODO: Connect to actual backend API
-    setTimeout(() => {
+    setError('');
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const res = await axios.post(`${apiUrl}/auth/register`, data);
+
+      if (res.data.success) {
+        window.location.href = '/login?registered=true';
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+    } finally {
       setIsLoading(false);
-      window.location.href = '/login';
-    }, 1500);
+    }
   };
 
   return (
@@ -36,6 +48,12 @@ export default function RegisterPage() {
         <h2 className="text-3xl font-extrabold text-gray-900 font-outfit">Create Account</h2>
         <p className="mt-2 text-sm text-gray-500">Join Big Bites to order food</p>
       </div>
+
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl relative text-sm font-medium">
+          {error}
+        </div>
+      )}
 
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
         <div>

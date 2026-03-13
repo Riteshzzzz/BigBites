@@ -32,7 +32,8 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const res = await axios.post('https://bigbites-backend.onrender.com/api/auth/login', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const res = await axios.post(`${apiUrl}/auth/login`, {
         email: data.email,
         password: data.password
       });

@@ -1,4 +1,7 @@
-require('dotenv').config();
+// Only load .env in development
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -8,7 +11,6 @@ const xss = require('xss-clean');
 const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 
-// Connect to database
 // Connect to database
 connectDB().then(async () => {
   const User = require('./models/User');
@@ -120,7 +122,11 @@ app.get('/api/debug/admin-check', async (req, res) => {
 
 // Port configuration
 const PORT = process.env.PORT || 5000;
+const ENV = process.env.NODE_ENV || 'development';
 
 server.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`Server running in ${ENV} mode on port ${PORT}`);
+  if (ENV === 'production' && !process.env.MONGODB_URI) {
+    console.error("WARNING: Missing MONGODB_URI in production environment!");
+  }
 });
