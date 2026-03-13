@@ -61,11 +61,19 @@ const allowedOrigins = [
 ];
 
 const corsOptions = {
-  origin: true, // Allow all origins temporarily to rule out CORS as the cause of login failure
+  origin: true, // Allow all origins in development
   credentials: true,
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
+
+// Logging middleware for debugging login
+app.use('/api/auth/login', (req, res, next) => {
+  if (req.method === 'POST') {
+    console.log(`[LOGIN ATTEMPT] ${new Date().toISOString()} - IP: ${req.ip}`);
+  }
+  next();
+});
 
 // Rate Limiting
 const apiLimiter = rateLimit({
