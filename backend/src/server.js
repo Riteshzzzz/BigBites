@@ -56,12 +56,22 @@ app.use(xss());
 const allowedOrigins = [
   'http://localhost:3000', 
   'http://localhost:3001',
+  'https://big-bites-admin.vercel.app',
+  'https://big-bites-customer.vercel.app',
   'https://frontend-admin-gkebr1759-ritesh-bhardwajs-projects.vercel.app',
   'https://frontend-customer-m1ctotr77-ritesh-bhardwajs-projects.vercel.app'
 ];
 
 const corsOptions = {
-  origin: true, // Allow all origins in development
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };
