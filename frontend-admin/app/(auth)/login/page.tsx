@@ -66,6 +66,19 @@ export default function LoginPage() {
     }
   };
 
+  const handleBypass = () => {
+    setIsLoading(true);
+    // Set a dummy token for bypass mode
+    const dummyToken = 'bypass-token';
+    localStorage.setItem('adminToken', dummyToken);
+    Cookies.set('token', dummyToken, { expires: 1 });
+    
+    // Brief delay for UX feedback then redirect
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 500);
+  };
+
   return (
     <div className="sm:mx-auto sm:w-full sm:max-w-md">
       <div className="flex justify-center mb-8">
@@ -162,6 +175,27 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">For Debugging Only</span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <button
+                onClick={handleBypass}
+                disabled={isLoading}
+                className="w-full flex justify-center py-2.5 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-colors disabled:opacity-70"
+              >
+                Direct Access (Skip Credentials)
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

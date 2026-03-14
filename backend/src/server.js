@@ -44,6 +44,9 @@ connectDB().then(async () => {
 const app = express();
 const server = http.createServer(app);
 
+// Trust proxy for Render/Cloudflare (essential for rate limiting)
+app.set('trust proxy', 1);
+
 // Initialize Socket.io
 const socket = require('./utils/socket');
 socket.init(server);
@@ -56,27 +59,34 @@ app.use(helmet({
 app.use(mongoSanitize());
 app.use(xss());
 
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'http://localhost:3001',
+  'https://big-bites-admin.vercel.app',
+  'https://big-bites-customer.vercel.app',
+  'https://frontend-admin-gkebr1759-ritesh-bhardwajs-projects.vercel.app',
+  'https://frontend-customer-m1ctotr77-ritesh-bhardwajs-projects.vercel.app',
+  'https://big-bites-admin-gkebr1759-ritesh-bhardwajs-projects.vercel.app',
+  'https://big-bites-customer-m1ctotr77-ritesh-bhardwajs-projects.vercel.app'
+];
+
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
     
-    const isVercel = origin.endsWith('.vercel.app');
-    const isLocal = origin.startsWith('http://localhost');
-    const isAllowedCustom = [
-      'https://big-bites-admin.vercel.app',
-      'https://big-bites-customer.vercel.app'
-    ].indexOf(origin) !== -1;
-
-    if (isVercel || isLocal || isAllowedCustom || process.env.NODE_ENV !== 'production') {
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
       callback(null, true);
     } else {
-      console.warn(`[CORS REJECT] Origin: ${origin}`);
+      console.warn(`[CORS REJECT] Origin: ${origin} (Not in whitelist)`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Set-Cookie']
 };
 app.use(cors(corsOptions));
 
